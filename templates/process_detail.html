@@ -17,6 +17,16 @@
                     <h1>{{ process.name }}</h1>
                     <p class="subtitle">{{ process.description }}</p>
                 </div>
+
+                <div class="detail-actions">
+                    <a class="button secondary-button" href="{{ url_for('edit_process', process_id=process.id) }}">Edit Process</a>
+                    <form method="POST" action="{{ url_for('delete_process', process_id=process.id) }}" onsubmit="return confirm('Delete this process and all of its workflow steps?');">
+                        <button class="button danger-button" type="submit">Delete</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="detail-status">
                 <span class="status {{ process.status|lower|replace(' ', '-') }}">{{ process.status }}</span>
             </div>
 
@@ -40,32 +50,16 @@
                 {% for step in process.steps %}
                 <div class="workflow-step">
                     <div class="step-number">{{ loop.index }}</div>
-
                     <div class="step-content">
                         <h3>{{ step.name }}</h3>
-
                         <div class="step-controls">
-                            <span class="step-status {{ step.status|lower|replace(' ', '-') }}">
-                                {{ step.status }}
-                            </span>
+                            <span class="step-status {{ step.status|lower|replace(' ', '-') }}">{{ step.status }}</span>
 
-                            <form
-                                method="POST"
-                                action="{{ url_for('update_step_status', process_id=process.id, step_index=loop.index0) }}"
-                                class="status-form"
-                            >
-                                <label class="sr-only" for="status-{{ loop.index }}">
-                                    Update status for {{ step.name }}
-                                </label>
-                                <select
-                                    id="status-{{ loop.index }}"
-                                    name="status"
-                                    onchange="this.form.submit()"
-                                >
+                            <form method="POST" action="{{ url_for('update_step_status', process_id=process.id, step_id=step.id) }}" class="status-form">
+                                <label class="sr-only" for="status-{{ step.id }}">Update status for {{ step.name }}</label>
+                                <select id="status-{{ step.id }}" name="status" onchange="this.form.submit()">
                                     {% for status in allowed_statuses %}
-                                    <option value="{{ status }}" {% if status == step.status %}selected{% endif %}>
-                                        {{ status }}
-                                    </option>
+                                    <option value="{{ status }}" {% if status == step.status %}selected{% endif %}>{{ status }}</option>
                                     {% endfor %}
                                 </select>
                             </form>
