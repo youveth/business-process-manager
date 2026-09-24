@@ -3,7 +3,7 @@ import sqlite3
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, g, render_template, request, redirect, url_for, session, flash
+from flask import Flask, g, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -172,6 +172,18 @@ def get_completion_percentage(process):
     return round((sum(step["status"] == "Completed" for step in process["steps"]) / total) * 100)
 
 
+def process_to_dict(process):
+    return {
+        "id": process["id"],
+        "name": process["name"],
+        "description": process["description"],
+        "owner": process["owner"],
+        "status": process["status"],
+        "progress": get_completion_percentage(process),
+        "steps": process["steps"],
+    }
+
+
 with app.app_context():
     init_db()
 
@@ -308,6 +320,133 @@ def delete_process(process_id):
     db.execute("DELETE FROM processes WHERE id = ?", (process_id,))
     db.commit()
     return redirect(url_for("index"))
+
+
+@app.route("/api/processes", methods=["GET"])
+@login_required
+def api_processes():
+    processes = [process_to_dict(get_process(row["id"])) for row in get_db().execute(
+        "SELECT id FROM processes ORDER BY id"
+    ).fetchall()]
+    return jsonify({"count": len(processes), "processes": processes})
+
+
+@app.route("/api/processes/<int:process_id>", methods=["GET"])
+@login_required
+def api_process_detail(process_id):
+    process = get_process(process_id)
+    if process is None:
+        return jsonify({"error": "Process not found"}), 404
+    return jsonify(process_to_dict(process))
+
+
+@app.route("/api/processes", methods=["POST"])
+@admin_required
+def api_create_process():
+    data = request.get_json(silent=True) or {}
+    name = str(data.get("name", "")).strip()
+    description = str(data.get("description", "")).strip()
+    owner = str(data.get("owner", "")).strip()
+    steps = data.get("steps", [])
+
+    if not name or not description or not owner:
+        return jsonify({"error": "name, description and owner are required"}), 400
+    if not isinstance(steps, list) or any(not str(step).strip() for step in steps):
+        return jsonify({"error": "steps must be a list of non-empty strings"}), 400
+
+    db = get_db()
+    cursor = db.execute(
+        "INSERT INTO processes (name, description, owner, status) VALUES (?, ?, ?, ?)",
+        (name, description, owner, "Pending")
+    )
+    process_id = cursor.lastrowid
+    db.executemany(
+        "INSERT INTO workflow_steps (process_id, name, status, step_order) VALUES (?, ?, ?, ?)",
+        [(process_id, str(step).strip(), "Pending", order) for order, step in enumerate(steps, start=1)]
+    )
+    db.commit()
+    return jsonify(process_to_dict(get_process(process_id))), 201
+
+
+@app.route("/api/processes/<int:process_id>", methods=["PUT"])
+@admin_required
+def api_update_process(process_id):
+    data = request.get_json(silent=True) or {}
+    process = get_process(process_id)
+    if process is None:
+        return jsonify({"error": "Process not found"}), 404
+
+    name = str(data.get("name", process["name"])).strip()
+    description = str(data.get("description", process["description"])).strip()
+    owner = str(data.get("owner", process["owner"])).strip()
+    if not name or not description or not owner:
+        return jsonify({"error": "name, description and owner are required"}), 400
+
+    db = get_db()
+    db.execute(
+        "UPDATE processes SET name = ?, description = ?, owner = ? WHERE id = ?",
+        (name, description, owner, process_id)
+    )
+
+    if "steps" in data:
+        steps = data["steps"]
+        if not isinstance(steps, list) or any(not str(step).strip() for step in steps):
+            return jsonify({"error": "steps must be a list of non-empty strings"}), 400
+        existing = db.execute(
+            "SELECT id FROM workflow_steps WHERE process_id = ? ORDER BY step_order",
+            (process_id,)
+        ).fetchall()
+        for index, step_name in enumerate(steps):
+            step_name = str(step_name).strip()
+            if index < len(existing):
+                db.execute(
+                    "UPDATE workflow_steps SET name = ?, step_order = ? WHERE id = ?",
+                    (step_name, index + 1, existing[index]["id"])
+                )
+            else:
+                db.execute(
+                    "INSERT INTO workflow_steps (process_id, name, status, step_order) VALUES (?, ?, ?, ?)",
+                    (process_id, step_name, "Pending", index + 1)
+                )
+        for row in existing[len(steps):]:
+            db.execute("DELETE FROM workflow_steps WHERE id = ?", (row["id"],))
+
+    db.commit()
+    update_process_status(process_id)
+    return jsonify(process_to_dict(get_process(process_id)))
+
+
+@app.route("/api/processes/<int:process_id>", methods=["DELETE"])
+@admin_required
+def api_delete_process(process_id):
+    db = get_db()
+    if db.execute("SELECT id FROM processes WHERE id = ?", (process_id,)).fetchone() is None:
+        return jsonify({"error": "Process not found"}), 404
+    db.execute("DELETE FROM processes WHERE id = ?", (process_id,))
+    db.commit()
+    return jsonify({"message": "Process deleted successfully"})
+
+
+@app.route("/api/processes/<int:process_id>/steps/<int:step_id>/status", methods=["PATCH"])
+@login_required
+def api_update_step_status(process_id, step_id):
+    data = request.get_json(silent=True) or {}
+    new_status = data.get("status")
+    if new_status not in ALLOWED_STEP_STATUSES:
+        return jsonify({"error": f"status must be one of: {', '.join(ALLOWED_STEP_STATUSES)}"}), 400
+
+    db = get_db()
+    step = db.execute(
+        "SELECT id FROM workflow_steps WHERE id = ? AND process_id = ?",
+        (step_id, process_id)
+    ).fetchone()
+    if step is None:
+        return jsonify({"error": "Step not found"}), 404
+
+    db.execute("UPDATE workflow_steps SET status = ? WHERE id = ?", (new_status, step_id))
+    db.commit()
+    update_process_status(process_id)
+    return jsonify(process_to_dict(get_process(process_id)))
 
 
 if __name__ == "__main__":
