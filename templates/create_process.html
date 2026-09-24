@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Process · Business Process Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container narrow">
+        <a class="back-link" href="{{ url_for('index') }}">← Back to dashboard</a>
+
+        <section class="panel form-panel">
+            <p class="eyebrow">Process Management</p>
+            <h1>Create a new process</h1>
+
+            <form method="POST">
+                <label for="name">Process name</label>
+                <input id="name" name="name" type="text" placeholder="e.g. Customer Support Request" required>
+
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="5" placeholder="Describe what this process is for." required></textarea>
+
+                <label for="owner">Process owner</label>
+                <input id="owner" name="owner" type="text" placeholder="e.g. Operations" required>
+
+                <button class="button" type="submit">Create Process</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
