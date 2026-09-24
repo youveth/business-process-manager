@@ -9,7 +9,6 @@
 <body>
     <main class="container narrow">
         <a class="back-link" href="{{ url_for('index') }}">← Back to dashboard</a>
-
         <section class="panel">
             <div class="detail-header">
                 <div>
@@ -17,18 +16,17 @@
                     <h1>{{ process.name }}</h1>
                     <p class="subtitle">{{ process.description }}</p>
                 </div>
-
                 <div class="detail-actions">
+                    {% if g.user["role"] == "admin" %}
                     <a class="button secondary-button" href="{{ url_for('edit_process', process_id=process.id) }}">Edit Process</a>
                     <form method="POST" action="{{ url_for('delete_process', process_id=process.id) }}" onsubmit="return confirm('Delete this process and all of its workflow steps?');">
                         <button class="button danger-button" type="submit">Delete</button>
                     </form>
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="detail-status">
-                <span class="status {{ process.status|lower|replace(' ', '-') }}">{{ process.status }}</span>
-            </div>
+            <div class="detail-status"><span class="status {{ process.status|lower|replace(' ', '-') }}">{{ process.status }}</span></div>
 
             <div class="detail-meta">
                 <span><strong>Owner:</strong> {{ process.owner }}</span>
@@ -37,13 +35,8 @@
             </div>
 
             <div class="progress-section">
-                <div class="progress-label">
-                    <span>Workflow completion</span>
-                    <strong>{{ progress }}%</strong>
-                </div>
-                <div class="progress-track">
-                    <div class="progress-bar" style="width: {{ progress }}%;"></div>
-                </div>
+                <div class="progress-label"><span>Workflow completion</span><strong>{{ progress }}%</strong></div>
+                <div class="progress-track"><div class="progress-bar" style="width: {{ progress }}%;"></div></div>
             </div>
 
             <div class="workflow">
@@ -54,7 +47,6 @@
                         <h3>{{ step.name }}</h3>
                         <div class="step-controls">
                             <span class="step-status {{ step.status|lower|replace(' ', '-') }}">{{ step.status }}</span>
-
                             <form method="POST" action="{{ url_for('update_step_status', process_id=process.id, step_id=step.id) }}" class="status-form">
                                 <label class="sr-only" for="status-{{ step.id }}">Update status for {{ step.name }}</label>
                                 <select id="status-{{ step.id }}" name="status" onchange="this.form.submit()">
