@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ process.name }} · Business Process Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container narrow">
+        <a class="back-link" href="{{ url_for('index') }}">← Back to dashboard</a>
+
+        <section class="panel">
+            <div class="detail-header">
+                <div>
+                    <p class="eyebrow">Workflow</p>
+                    <h1>{{ process.name }}</h1>
+                    <p class="subtitle">{{ process.description }}</p>
+                </div>
+                <span class="status {{ process.status|lower|replace(' ', '-') }}">{{ process.status }}</span>
+            </div>
+
+            <div class="detail-meta">
+                <span><strong>Owner:</strong> {{ process.owner }}</span>
+                <span><strong>Steps:</strong> {{ process.steps|length }}</span>
+            </div>
+
+            <div class="workflow">
+                {% for step in process.steps %}
+                <div class="workflow-step">
+                    <div class="step-number">{{ loop.index }}</div>
+                    <div class="step-content">
+                        <h3>{{ step.name }}</h3>
+                        <span class="step-status {{ step.status|lower|replace(' ', '-') }}">{{ step.status }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <p class="empty">No workflow steps have been added yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
