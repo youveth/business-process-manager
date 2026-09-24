@@ -1,24 +1,32 @@
 # Business Process Manager
 
-A beginner-friendly Flask web application for tracking and organizing business processes and their workflows.
+A Flask web application for tracking and organizing business processes and their workflows.
 
-## Current features
+This project is designed as a portfolio project around **business processes, digitalization, and IT management**.
+
+## Live Demo
+
+The application is deployed online with Render.
+
+## Features
 
 - Dashboard with process statistics
-- List of business processes
-- Create a new process
-- Edit process details and workflow steps
-- Delete processes with confirmation
-- Process owner and status
-- Workflow steps for each process
-- Process detail page with a visual step-by-step workflow
+- Business process management
+- Create, edit, and delete processes
+- Process owner and status management
+- Workflow steps
 - Workflow step status updates
 - Automatic process status updates
 - Workflow completion percentage
-- SQLite database for persistent data
-- Responsive web interface
+- Authentication and user roles
+- Admin/User permissions
+- REST API
+- SQLite database
+- Automated tests with pytest
+- GitHub Actions CI
+- Production deployment with Gunicorn
 
-## Example workflows
+## Example Workflows
 
 ### Purchase Request
 
@@ -28,46 +36,132 @@ Employee submits request → Manager approval → Finance review → Payment →
 
 Collect employee documents → Create accounts and access → Team introduction → Complete onboarding
 
-## Tech stack
+## REST API
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | /api/processes | List processes |
+| GET | /api/processes/<id> | Get one process |
+| POST | /api/processes | Create a process |
+| PUT | /api/processes/<id> | Update a process |
+| DELETE | /api/processes/<id> | Delete a process |
+| PATCH | /api/processes/<id>/steps/<step_id>/status | Update step status |
+
+API access follows the application's authentication and role permissions.
+
+## Testing
+
+Automated tests are located in:
+
+`tests/test_app.py`
+
+Run them with:
+
+```bash
+pytest -q
+```
+
+GitHub Actions automatically runs the test suite for pushes and pull requests to `main`.
+
+## Tech Stack
 
 - Python
 - Flask
 - SQLite
 - HTML
 - CSS
+- pytest
+- Gunicorn
+- GitHub Actions
+- Render
 
-## Run locally
+## Run Locally
+
+Create a virtual environment:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python app.py
 ```
 
-On Windows:
+Activate it.
+
+Linux/macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+Windows:
 
 ```bash
 .venv\\Scripts\\activate
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
+```
+
+Run the application:
+
+```bash
 python app.py
 ```
 
-Then open `http://127.0.0.1:5000`.
+Then open:
 
-The SQLite database is created automatically in `instance/business_process_manager.db` the first time the application starts.
+`http://127.0.0.1:5000`
+
+The SQLite database is created automatically in:
+
+`instance/business_process_manager.db`
+
+## Project Structure
+
+```text
+business-process-manager/
+├── app.py
+├── requirements.txt
+├── README.md
+├── tests/
+│   └── test_app.py
+├── templates/
+├── static/
+├── instance/
+└── .github/
+    └── workflows/
+        └── tests.yml
+```
 
 ## Roadmap
 
-1. ~~Add process steps and workflow management~~
-2. ~~Add workflow step status updates~~
-3. ~~Add SQLite database~~
-4. ~~Add edit/delete actions~~
-5. Add authentication and user roles
-6. Add REST API
-7. Add tests
-8. Deploy the application
+- [x] Process and workflow management
+- [x] Workflow status updates
+- [x] SQLite persistence
+- [x] Edit/delete actions
+- [x] Authentication and user roles
+- [x] REST API
+- [x] Automated tests
+- [x] GitHub Actions CI
+- [x] Deployment
+- [ ] Production security improvements
+- [ ] PostgreSQL database
+- [ ] Improved API documentation
+- [ ] Dashboard analytics
 
-## Project goal
+## Portfolio Goal
 
-This project is part of a portfolio focused on business processes, digitalization, and IT management.
+This project demonstrates practical skills in:
+
+- Business process management
+- Digitalization
+- CRUD application development
+- Authentication and authorization
+- REST API design
+- Database management
+- Automated testing
+- CI/CD basics
+- Cloud deployment
+
+It is part of a portfolio focused on **Business IT, Digitalization, Information Systems, and IT Management**.
