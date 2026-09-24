@@ -1,3 +1,8 @@
+import os
+
+os.environ["ADMIN_PASSWORD"] = "test-admin-password"
+os.environ["USER_PASSWORD"] = "test-user-password"
+
 import pytest
 
 import app as app_module
@@ -38,7 +43,7 @@ def test_dashboard_requires_login(client):
 
 
 def test_admin_can_login(client):
-    response = login(client, "admin", "admin123")
+    response = login(client, "admin", "test-admin-password")
     assert response.status_code == 200
     assert b"Business Process Manager" in response.data
 
@@ -50,7 +55,7 @@ def test_invalid_login_is_rejected(client):
 
 
 def test_user_cannot_create_process(client):
-    login(client, "user", "user123")
+    login(client, "user", "test-user-password")
 
     response = client.post(
         "/processes/new",
@@ -66,7 +71,7 @@ def test_user_cannot_create_process(client):
 
 
 def test_admin_can_create_process(client):
-    login(client, "admin", "admin123")
+    login(client, "admin", "test-admin-password")
 
     response = client.post(
         "/processes/new",
@@ -90,7 +95,7 @@ def test_admin_can_create_process(client):
 
 
 def test_user_can_update_workflow_step(client):
-    login(client, "user", "user123")
+    login(client, "user", "test-user-password")
 
     response = client.post(
         "/processes/1/steps/1/status",
@@ -114,7 +119,7 @@ def test_api_processes_requires_login(client):
 
 
 def test_api_processes_returns_json(client):
-    login(client, "user", "user123")
+    login(client, "user", "test-user-password")
 
     response = client.get("/api/processes")
 
@@ -126,7 +131,7 @@ def test_api_processes_returns_json(client):
 
 
 def test_api_create_process_is_admin_only(client):
-    login(client, "user", "user123")
+    login(client, "user", "test-user-password")
 
     response = client.post(
         "/api/processes",
@@ -142,7 +147,7 @@ def test_api_create_process_is_admin_only(client):
 
 
 def test_api_admin_can_create_process(client):
-    login(client, "admin", "admin123")
+    login(client, "admin", "test-admin-password")
 
     response = client.post(
         "/api/processes",
@@ -161,7 +166,7 @@ def test_api_admin_can_create_process(client):
 
 
 def test_api_rejects_invalid_step_status(client):
-    login(client, "user", "user123")
+    login(client, "user", "test-user-password")
 
     response = client.patch(
         "/api/processes/1/steps/1/status",
@@ -172,7 +177,7 @@ def test_api_rejects_invalid_step_status(client):
 
 
 def test_delete_process_cascades_workflow_steps(client):
-    login(client, "admin", "admin123")
+    login(client, "admin", "test-admin-password")
 
     with app_module.app.app_context():
         db = app_module.get_db()
