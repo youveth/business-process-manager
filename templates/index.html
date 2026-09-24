@@ -47,7 +47,9 @@
                     </div>
                     <div class="meta">
                         <span>Owner: {{ process.owner }}</span>
+                        <span>{{ process.steps|length }} workflow steps</span>
                         <span class="status {{ process.status|lower|replace(' ', '-') }}">{{ process.status }}</span>
+                        <a class="details-link" href="{{ url_for('process_detail', process_id=process.id) }}">View workflow →</a>
                     </div>
                 </article>
                 {% else %}
