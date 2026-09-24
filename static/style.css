@@ -154,7 +154,7 @@ h1 {
     background: #f1eadf;
 }
 
-.step-status.completed {
+.status.completed, .step-status.completed {
     background: #e2ebe5;
 }
 
@@ -221,6 +221,38 @@ h1 {
     color: #746e66;
 }
 
+.progress-section {
+    margin-top: 24px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+    color: #746e66;
+    font-size: 0.9rem;
+}
+
+.progress-label strong {
+    color: #292621;
+}
+
+.progress-track {
+    width: 100%;
+    height: 12px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #eee9e1;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: inherit;
+    background: #302a24;
+    transition: width 0.2s ease;
+}
+
 .workflow {
     position: relative;
     margin-top: 28px;
@@ -254,7 +286,41 @@ h1 {
 }
 
 .step-content h3 {
-    margin: 0 0 8px;
+    margin: 0 0 10px;
+}
+
+.step-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.status-form {
+    margin: 0;
+}
+
+.status-form select {
+    border: 1px solid #d9d2c8;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font: inherit;
+    background: white;
+    color: #292621;
+    cursor: pointer;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .empty {
