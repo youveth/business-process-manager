@@ -14,7 +14,15 @@
                 <h1>Business Process Manager</h1>
                 <p class="subtitle">Track and organize company processes in one place.</p>
             </div>
-            <a class="button" href="{{ url_for('create_process') }}">+ New Process</a>
+            <div class="header-actions">
+                {% if g.user["role"] == "admin" %}
+                <a class="button" href="{{ url_for('create_process') }}">+ New Process</a>
+                {% endif %}
+                <span class="user-badge">{{ g.user["username"] }} · {{ g.user["role"] }}</span>
+                <form method="POST" action="{{ url_for('logout') }}">
+                    <button class="logout-button" type="submit">Logout</button>
+                </form>
+            </div>
         </header>
 
         <section class="stats">
@@ -24,30 +32,23 @@
         </section>
 
         <section class="panel">
-            <div class="panel-header">
-                <h2>Processes</h2>
-                <span>{{ processes|length }} items</span>
-            </div>
-
+            <div class="panel-header"><h2>Processes</h2><span>{{ processes|length }} items</span></div>
             <div class="process-list">
                 {% for process in processes %}
                 <article class="process-card">
-                    <div>
-                        <h3>{{ process.name }}</h3>
-                        <p>{{ process.description }}</p>
-                    </div>
-
+                    <div><h3>{{ process.name }}</h3><p>{{ process.description }}</p></div>
                     <div class="meta">
                         <span>Owner: {{ process.owner }}</span>
                         <span>{{ process.step_count }} workflow steps</span>
                         <span class="status {{ process.status|lower|replace(' ', '-') }}">{{ process.status }}</span>
-
                         <div class="card-actions">
                             <a class="details-link" href="{{ url_for('process_detail', process_id=process.id) }}">View workflow →</a>
+                            {% if g.user["role"] == "admin" %}
                             <a class="edit-link" href="{{ url_for('edit_process', process_id=process.id) }}">Edit</a>
                             <form method="POST" action="{{ url_for('delete_process', process_id=process.id) }}" onsubmit="return confirm('Delete this process and all of its workflow steps?');">
                                 <button class="delete-button" type="submit">Delete</button>
                             </form>
+                            {% endif %}
                         </div>
                     </div>
                 </article>
