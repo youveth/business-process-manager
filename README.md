@@ -7,6 +7,8 @@ A beginner-friendly Flask web application for tracking and organizing business p
 - Dashboard with process statistics
 - List of business processes
 - Create a new process
+- Edit process details and workflow steps
+- Delete processes with confirmation
 - Process owner and status
 - Workflow steps for each process
 - Process detail page with a visual step-by-step workflow
@@ -60,7 +62,7 @@ The SQLite database is created automatically in `instance/business_process_manag
 1. ~~Add process steps and workflow management~~
 2. ~~Add workflow step status updates~~
 3. ~~Add SQLite database~~
-4. Add edit/delete actions
+4. ~~Add edit/delete actions~~
 5. Add authentication and user roles
 6. Add REST API
 7. Add tests
