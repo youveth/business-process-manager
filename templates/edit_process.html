@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit {{ process.name }} · Business Process Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container narrow">
+        <a class="back-link" href="{{ url_for('process_detail', process_id=process.id) }}">← Back to process</a>
+
+        <section class="panel form-panel">
+            <p class="eyebrow">Process Management</p>
+            <h1>Edit process</h1>
+
+            <form method="POST">
+                <label for="name">Process name</label>
+                <input id="name" name="name" type="text" value="{{ process.name }}" required>
+
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="5" required>{{ process.description }}</textarea>
+
+                <label for="owner">Process owner</label>
+                <input id="owner" name="owner" type="text" value="{{ process.owner }}" required>
+
+                <label for="steps">Workflow steps</label>
+                <textarea id="steps" name="steps" rows="8">{% for step in process.steps %}{{ step.name }}{% if not loop.last %}
+{% endif %}{% endfor %}</textarea>
+                <p class="form-help">Edit, remove, or add steps. Existing statuses are preserved by position. New steps start as Pending.</p>
+
+                <div class="form-actions">
+                    <a class="button secondary-button" href="{{ url_for('process_detail', process_id=process.id) }}">Cancel</a>
+                    <button class="button" type="submit">Save Changes</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
