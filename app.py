@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
+ALLOWED_STEP_STATUSES = ["Pending", "In Progress", "Completed"]
+
+
 processes = [
     {
         "id": 1,
@@ -21,7 +24,7 @@ processes = [
         "name": "Purchase Request",
         "description": "Process for requesting and approving a company purchase.",
         "owner": "Finance",
-        "status": "Pending",
+        "status": "In Progress",
         "steps": [
             {"name": "Employee submits request", "status": "Completed"},
             {"name": "Manager approval", "status": "In Progress"},
@@ -33,8 +36,42 @@ processes = [
 ]
 
 
+def update_process_status(process):
+    steps = process["steps"]
+
+    if not steps:
+        process["status"] = "Pending"
+        return
+
+    statuses = [step["status"] for step in steps]
+
+    if all(status == "Completed" for status in statuses):
+        process["status"] = "Completed"
+    elif any(status in ["In Progress", "Completed"] for status in statuses):
+        process["status"] = "In Progress"
+    else:
+        process["status"] = "Pending"
+
+
+def get_completion_percentage(process):
+    total_steps = len(process["steps"])
+
+    if total_steps == 0:
+        return 0
+
+    completed_steps = sum(
+        step["status"] == "Completed"
+        for step in process["steps"]
+    )
+
+    return round((completed_steps / total_steps) * 100)
+
+
 @app.route("/")
 def index():
+    for process in processes:
+        update_process_status(process)
+
     return render_template("index.html", processes=processes)
 
 
@@ -45,7 +82,39 @@ def process_detail(process_id):
     if process is None:
         return "Process not found", 404
 
-    return render_template("process_detail.html", process=process)
+    update_process_status(process)
+    progress = get_completion_percentage(process)
+
+    return render_template(
+        "process_detail.html",
+        process=process,
+        progress=progress,
+        allowed_statuses=ALLOWED_STEP_STATUSES,
+    )
+
+
+@app.route(
+    "/processes/<int:process_id>/steps/<int:step_index>/status",
+    methods=["POST"],
+)
+def update_step_status(process_id, step_index):
+    process = next((item for item in processes if item["id"] == process_id), None)
+
+    if process is None:
+        return "Process not found", 404
+
+    if step_index < 0 or step_index >= len(process["steps"]):
+        return "Step not found", 404
+
+    new_status = request.form.get("status")
+
+    if new_status not in ALLOWED_STEP_STATUSES:
+        return "Invalid status", 400
+
+    process["steps"][step_index]["status"] = new_status
+    update_process_status(process)
+
+    return redirect(url_for("process_detail", process_id=process_id))
 
 
 @app.route("/processes/new", methods=["GET", "POST"])
