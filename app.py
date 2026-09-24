@@ -57,11 +57,23 @@ def init_db():
     """)
 
     if db.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0:
+        admin_password = os.environ.get("ADMIN_PASSWORD")
+        user_password = os.environ.get("USER_PASSWORD")
+
+        if not admin_password or not user_password:
+            raise RuntimeError(
+                "ADMIN_PASSWORD and USER_PASSWORD environment variables are required "
+                "when initializing a new database."
+            )
+
+        admin_username = os.environ.get("ADMIN_USERNAME", "admin")
+        user_username = os.environ.get("USER_USERNAME", "user")
+
         db.executemany(
             "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
             [
-                ("admin", generate_password_hash("admin123"), "admin"),
-                ("user", generate_password_hash("user123"), "user"),
+                (admin_username, generate_password_hash(admin_password), "admin"),
+                (user_username, generate_password_hash(user_password), "user"),
             ],
         )
 
