@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Process Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Business Operations</p>
+                <h1>Business Process Manager</h1>
+                <p class="subtitle">Track and organize company processes in one place.</p>
+            </div>
+            <a class="button" href="{{ url_for('create_process') }}">+ New Process</a>
+        </header>
+
+        <section class="stats">
+            <div class="stat-card">
+                <span>Total Processes</span>
+                <strong>{{ processes|length }}</strong>
+            </div>
+            <div class="stat-card">
+                <span>In Progress</span>
+                <strong>{{ processes|selectattr('status', 'equalto', 'In Progress')|list|length }}</strong>
+            </div>
+            <div class="stat-card">
+                <span>Pending</span>
+                <strong>{{ processes|selectattr('status', 'equalto', 'Pending')|list|length }}</strong>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Processes</h2>
+                <span>{{ processes|length }} items</span>
+            </div>
+
+            <div class="process-list">
+                {% for process in processes %}
+                <article class="process-card">
+                    <div>
+                        <h3>{{ process.name }}</h3>
+                        <p>{{ process.description }}</p>
+                    </div>
+                    <div class="meta">
+                        <span>Owner: {{ process.owner }}</span>
+                        <span class="status {{ process.status|lower|replace(' ', '-') }}">{{ process.status }}</span>
+                    </div>
+                </article>
+                {% else %}
+                <p class="empty">No processes yet. Create your first process.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
