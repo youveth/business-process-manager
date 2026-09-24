@@ -23,15 +23,53 @@
             <div class="detail-meta">
                 <span><strong>Owner:</strong> {{ process.owner }}</span>
                 <span><strong>Steps:</strong> {{ process.steps|length }}</span>
+                <span><strong>Progress:</strong> {{ progress }}%</span>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-label">
+                    <span>Workflow completion</span>
+                    <strong>{{ progress }}%</strong>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-bar" style="width: {{ progress }}%;"></div>
+                </div>
             </div>
 
             <div class="workflow">
                 {% for step in process.steps %}
                 <div class="workflow-step">
                     <div class="step-number">{{ loop.index }}</div>
+
                     <div class="step-content">
                         <h3>{{ step.name }}</h3>
-                        <span class="step-status {{ step.status|lower|replace(' ', '-') }}">{{ step.status }}</span>
+
+                        <div class="step-controls">
+                            <span class="step-status {{ step.status|lower|replace(' ', '-') }}">
+                                {{ step.status }}
+                            </span>
+
+                            <form
+                                method="POST"
+                                action="{{ url_for('update_step_status', process_id=process.id, step_index=loop.index0) }}"
+                                class="status-form"
+                            >
+                                <label class="sr-only" for="status-{{ loop.index }}">
+                                    Update status for {{ step.name }}
+                                </label>
+                                <select
+                                    id="status-{{ loop.index }}"
+                                    name="status"
+                                    onchange="this.form.submit()"
+                                >
+                                    {% for status in allowed_statuses %}
+                                    <option value="{{ status }}" {% if status == step.status %}selected{% endif %}>
+                                        {{ status }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 {% else %}
